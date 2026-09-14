@@ -1,11 +1,11 @@
 import express from "express";
-import logger from "./src/utils/logger";
-import transacoesRoutes from "./src/routes/transacoes.router.js";
+import logger from "./src/utils/logger.js";
+import transacoesRoutes from "./src/routes/transacoes.routes.js";
 const app = express();
 
 app.use(express.json());
 app.use(logger);
-app.use(transacoesRoutes);
+app.use("/transacoes", transacoesRoutes);
 
 app.get("/", (req, res) => {
     res.json({
