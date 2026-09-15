@@ -2,9 +2,44 @@ import pool from "../db/connection.js";
 
 const adicionarTransacao = async (req, res, next) => {
     try {
-        const { descricao, valor, tipo, data, categoria_id} = req.body;
-        
-        
+        const { descricao, valor, tipo, data, categoria_id } = req.body;
+
+        if (typeof descricao !== "string") {
+            const erro = new Error("Descrição deve ser uma string.");
+            erro.status = 400;
+            throw erro;
+        }
+
+        if (typeof valor !== "number") {
+            const erro = new Error("Valor deve ser um número.");
+            erro.status = 400;
+            throw erro;
+        }
+
+        if (valor <= 0) {
+            const erro = new Error("Valor deve ser maior que zero.");
+            erro.status = 400;
+            throw erro;
+        }
+
+        if (typeof tipo !== "string" || (tipo !== "entrada" && tipo !== "saida")) {
+            const erro = new Error("Tipo deve ser 'entrada' ou 'saida'.");
+            erro.status = 400;
+            throw erro;
+        }
+
+        if (typeof data !== "string") {
+            const erro = new Error("Data deve ser uma string.");
+            erro.status = 400;
+            throw erro;
+        }
+
+        if (typeof categoria_id !== "number") {
+            const erro = new Error("categoria_id deve ser um número.");
+            erro.status = 400;
+            throw erro;
+        }
+
         const resultado = await pool.query(
             "INSERT INTO transacoes (descricao, valor, tipo, data, categoria_id) VALUES ($1, $2, $3, $4, $5) RETURNING *",
             [descricao, valor, tipo, data, categoria_id]
@@ -21,28 +56,26 @@ const listarTransacoes = async (req, res, next) => {
         const resultado = await pool.query("SELECT * FROM transacoes");
 
         res.json(resultado.rows);
-
     } catch (error) {
         next(error);
     }
-}
+};
 
 const buscarTransacaoPorId = async (req, res, next) => {
     try {
-        const {id} = req.params;
+        const { id } = req.params;
 
-        const resultado = await pool.query("SELECT * FROM transacoes WHERE id = $1",
-            [id]);
+        const resultado = await pool.query("SELECT * FROM transacoes WHERE id = $1", [id]);
 
-           if (resultado.rows.length === 0) {
-            return res.status(404).json({message: "Transação não encontrada"});
-           }
-           res.json(resultado.rows[0]);
-
+        if (resultado.rows.length === 0) {
+            return res.status(404).json({ message: "Transação não encontrada" });
+        }
+        res.json(resultado.rows[0]);
     } catch (error) {
         next(error);
     }
-}
+};
+
 const atualizarTransacao = async (req, res, next) => {
     try {
         const { id } = req.params;
