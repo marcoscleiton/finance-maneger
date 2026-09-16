@@ -69,14 +69,38 @@ const atualizarTransacao = async (req, res, next) => {
     try {
         const { id } = req.params;
         const { descricao, valor, tipo, categoria_id, data } = req.body;
+        
+        if (descricao !== undefined && typeof descricao !== "string") {
+            throw criarErro("A descrição deve ser um texto", 400);
+        }
+        
+        if (valor !== undefined && typeof valor !== "number") {
+            throw criarErro("O valor deve ser um número", 400);
+        }
+
+        if (tipo !== undefined && typeof tipo !== "string") {
+            throw criarErro("O valor deve ser um texto", 400);
+        }
+        
+        if (categoria_id !== undefined && typeof categoria_id !== "number") {
+            throw criarErro("O valor deve ser um número", 400);
+        }
+
+        if (data !== undefined && typeof data !== "string") {
+            throw criarErro("O valor deve ser um texto", 400);
+        }
 
         const resultado = await pool.query(
-            `UPDATE transacoes 
-             SET descricao = $1, valor = $2, tipo = $3, categoria_id = $4, data = $5
-             WHERE id = $6
-             RETURNING *`,
-            [descricao, valor, tipo, categoria_id, data, id]
-        );
+        `UPDATE transacoes 
+         SET descricao = COALESCE($1, descricao),
+         valor = COALESCE($2, valor),
+         tipo = COALESCE($3, tipo),
+         categoria_id = COALESCE($4, categoria_id),
+         data = COALESCE($5, data)
+         WHERE id = $6
+         RETURNING *`,
+        [descricao, valor, tipo, categoria_id, data, id]
+);
 
         if (resultado.rows.length === 0) {
             return res.status(404).json({ message: "Transação não encontrada" });
