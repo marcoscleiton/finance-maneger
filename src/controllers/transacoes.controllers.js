@@ -1,43 +1,32 @@
 import pool from "../db/connection.js";
+import { criarErro } from "../utils/error.js";
 
 const adicionarTransacao = async (req, res, next) => {
     try {
         const { descricao, valor, tipo, data, categoria_id } = req.body;
 
         if (typeof descricao !== "string") {
-            const erro = new Error("Descrição deve ser uma string.");
-            erro.status = 400;
-            throw erro;
+           throw criarErro("O valor inserido deve ser um texto", 400);
         }
 
         if (typeof valor !== "number") {
-            const erro = new Error("Valor deve ser um número.");
-            erro.status = 400;
-            throw erro;
+            throw criarErro("O valor inserido deve ser um número", 400)
         }
 
         if (valor <= 0) {
-            const erro = new Error("Valor deve ser maior que zero.");
-            erro.status = 400;
-            throw erro;
+            throw criarErro("O valor deve ser maior que zero", 400);
         }
 
         if (typeof tipo !== "string" || (tipo !== "entrada" && tipo !== "saida")) {
-            const erro = new Error("Tipo deve ser 'entrada' ou 'saida'.");
-            erro.status = 400;
-            throw erro;
+            throw criarErro("O tipo deve ser 'entrada' ou 'saída'", 400);
         }
 
         if (typeof data !== "string") {
-            const erro = new Error("Data deve ser uma string.");
-            erro.status = 400;
-            throw erro;
+            throw criarErro("A data deve ser um texto", 400);
         }
 
         if (typeof categoria_id !== "number") {
-            const erro = new Error("categoria_id deve ser um número.");
-            erro.status = 400;
-            throw erro;
+            throw criarErro("categoria_id deve ser um número", 400);
         }
 
         const resultado = await pool.query(
